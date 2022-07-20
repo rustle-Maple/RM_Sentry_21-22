@@ -1,0 +1,9 @@
+{
+    "files.associations": {
+        "robots_control.h": "c",
+        "Debug_DataScope.C": "cpp",
+        "powerlimit_control.h": "c",
+        "cloud_control.h": "c",
+        "temp_chassis.h": "c"
+    }
+}
