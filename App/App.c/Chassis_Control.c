@@ -10,7 +10,7 @@ const float Encoder_UnitLength = (float)Encoder_Perimeter / Encoder_Lines;
 const float Limit_Velocity = 3000.0f;			//3500
 const float Cruise_Velocity = 6000.0f;		//6000
 const uint16_t R_Increment_times = 300;
-const uint16_t R_Lower_Limit = 5500;			//5500
+const uint16_t R_Lower_Limit = 6000;			//5500
 const uint16_t R_Upper_Limit = 9000;			//8000
 // const float Random_Velocity = 6500.0f;
 const float Frenzy_Velocity = 6500.0f;
@@ -285,11 +285,11 @@ void Random_Processing(void)
     //更新方向随机数
     Chassis.Random.Dir_number = Get_RandomNumbers_Range(0, 100);
 		//更新时间随机数
-		Chassis.Random.Time_number = Get_RandomNumbers_Range(300,450);
-		if(Robots_Control.Chassis_e == A_cs_Cruise)
-		{
-			Chassis.Random.Time_number = Get_RandomNumbers_Range(450,600);
-		}
+		Chassis.Random.Time_number = Get_RandomNumbers_Range(400,650);
+//		if(Robots_Control.Chassis_e == A_cs_Cruise)
+//		{
+//			Chassis.Random.Time_number = Get_RandomNumbers_Range(450,600);
+//		}
 		//3000ms进行一次模式切换的检测
 		if((Chassis.Random.Time % 3000 == 0) && Chassis.Random.Time > 0)
 		{
@@ -330,11 +330,16 @@ void Random_Processing(void)
 				Chassis.Random.Dir_times = 0; 						//方向周期清0
 			}
 //		}
+			if(Chassis.Random.Dir_times > 610)				//限幅：防止无法res_d条件不成立无法进入变向清0
+			{
+				Chassis.Random.Dir_times = 0;
+			}
 		
 		//无受到攻击时巡航减低速度
 		if(Robots_Control.Chassis_e == A_cs_Cruise)
 		{
-			Chassis.Random.percent = 0.75f;
+//		Chassis.Random.percent = 0.75f;
+			Chassis.Random.percent = 1.0f;
 		}
 		
     //排除随机运动的方向与撞柱方向的冲突
@@ -746,7 +751,7 @@ void Chassis_Init(void)
     //    Chassis_PowerLimit.PowerRatio_Denominator = 200.0f;
     // PID的初始化
     //速度的增量式pid的初始化
-    I_PID_FUN.I_PID_Parameter_Init(Chassis.Velocity.I_PID, 8.5f, 0.25f, 0.0f, 20000.0f, 0.0f, 0.0f, 0.85, 8000, -8000, 16000, -16000);
+    I_PID_FUN.I_PID_Parameter_Init(Chassis.Velocity.I_PID, 8.5f, 0.25f, 0.0f, 20000.0f, 0.0f, 0.0f, 0.85, 10000, -10000, 16000, -16000);
     //位置的位置式pid的初始化
     //坐标轴都是同向的呀
     //外环Kp,不可以给太小，外环输出会相对于内环测量小很多
@@ -755,7 +760,7 @@ void Chassis_Init(void)
 		
 		//刹车电机PID初始化
     P_PID_FUN.P_PID_Parameter_Init(&BREAK_ANGLE_pid, 0.3f, 0.0f, 0.0f, 5000.0f, 0.0f, 0.0f, 0.85, 10, -10, 3500, -3500); //实际上看你想要的目标速度是多少
-    P_PID_FUN.P_PID_Parameter_Init(&BREAK_SPEED_pid, 3.0f, 0.01f, 0.0f, 3000.0f, 0.0f, 0.0f, 0.85, 1000, -1000, 9999, -9999);
+    P_PID_FUN.P_PID_Parameter_Init(&BREAK_SPEED_pid, 3.0f, 0.01f, 0.0f, 3000.0f, 0.0f, 0.0f, 0.85, 500, -500, 4000, -4000);
 				
 
     //判断主控是否连上服务器 - 则对应相应的底盘功率
@@ -801,6 +806,15 @@ void Chassis_Control(void)
         I_PID_FUN.I_PID_Parameter_Clear(Chassis.Velocity.I_PID);
         P_PID_FUN.P_PID_Parameter_Clear(Chassis.Location.P_PID);
         P_PID_FUN.P_PID_Parameter_Clear(Chassis.Velocity.P_PID);
+			
+				//失能
+				send_to_break = 0;
+				//清空变向刹车状态
+				Chassis.Random.Break_flag = 0;
+				//刹车状态清0
+				Break_static = 0;
+				//刹车目标值置为中值
+				M2006_targe_angle = break_basic.BREAK_MID;	
 
         return;
     }
@@ -935,18 +949,20 @@ void Chassis_Control(void)
 		//zhuangzhu
     if (Robots_Control.Chassis_e == A_cs_Cruise || Robots_Control.Chassis_e == A_cs_Random)
 		{
+			//debug
+			Chassis.encoder->Offline_flag = 1;
 			//编码器优先
 			//左
 			if(Chassis.encoder->Offline_flag == 0)
 			{
-				if(Chassis.encoder->totalLine > (Chassis.Route_limit.left - 10400) && Chassis.EM->realSpeed > 30)
+				if(Chassis.encoder->totalLine > (Chassis.Route_limit.left - 6400) && Chassis.EM->realSpeed > 30)
 				{
 					Chassis.CDisable.Left_flag = 1;
 				}
 			}
 			else if(Sensor_L.RawData.APM > 1000)
 			{
-				if(Sensor_L.RawData.DIST < 35 && Chassis.EM->realSpeed > 30)
+				if(Sensor_L.RawData.DIST < 50 && Chassis.EM->realSpeed > 30)
 				{
 					Chassis.CDisable.Left_flag = 1;
 				}
@@ -954,14 +970,14 @@ void Chassis_Control(void)
 			//右
 			if(Chassis.encoder->Offline_flag == 0)
 			{
-				if(Chassis.encoder->totalLine < (Chassis.Route_limit.right  + 10400) && Chassis.EM->realSpeed < -30)
+				if(Chassis.encoder->totalLine < (Chassis.Route_limit.right  + 6400) && Chassis.EM->realSpeed < -30)
 				{
 					Chassis.CDisable.Right_flag = 1;
 				}
 			}
 			else if(Sensor_R.RawData.APM > 1000)
 			{
-				if(Sensor_R.RawData.DIST < 35 && Chassis.EM->realSpeed < -30)
+				if(Sensor_R.RawData.DIST < 50 && Chassis.EM->realSpeed < -30)
 				{
 					Chassis.CDisable.Right_flag = 1;
 				}
@@ -1009,7 +1025,7 @@ void Chassis_Control(void)
 					}
 					else if(Sensor_L.RawData.APM > 100)
 					{
-						if((Sensor_L.RawData.DIST > 20 && Chassis.EM->realSpeed < -30)|| Chassis.CDisable.Left_times > 150)
+						if((Sensor_L.RawData.DIST > 30 && Chassis.EM->realSpeed < -30)|| Chassis.CDisable.Left_times > 150)
 						{
 							Chassis.CDisable.Left_flag = 0;
 							Chassis.Velocity.temp_Speed = -fabs(Chassis.Velocity.temp_Speed);
@@ -1059,7 +1075,7 @@ void Chassis_Control(void)
 					}
 					else if(Sensor_R.RawData.APM > 100)
 					{
-						if((Sensor_R.RawData.DIST > 20 && Chassis.EM->realSpeed > 30)|| Chassis.CDisable.Right_times > 150)
+						if((Sensor_R.RawData.DIST > 30 && Chassis.EM->realSpeed > 30)|| Chassis.CDisable.Right_times > 150)
 						{
 							Chassis.CDisable.Right_flag = 0;
 							Chassis.Velocity.temp_Speed = fabs(Chassis.Velocity.temp_Speed);
