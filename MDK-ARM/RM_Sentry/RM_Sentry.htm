@@ -3,7 +3,7 @@
 <title>Static Call Graph - [RM_Sentry\RM_Sentry.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image RM_Sentry\RM_Sentry.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060750: Last Updated: Mon Jul 25 21:08:53 2022
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060750: Last Updated: Wed Jul 27 14:58:19 2022
 <BR><P>
 <H3>Maximum Stack Usage =        424 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -576,10 +576,10 @@ Global Symbols
 <P><STRONG><a name="[b3]"></a>__aeabi_dadd</STRONG> (Thumb, 322 bytes, Stack size 48 bytes, dadd.o(.text))
 <BR><BR>[Stack]<UL><LI>Max Depth = 88<LI>Call Chain = __aeabi_dadd &rArr; _double_epilogue &rArr; _double_round
 </UL>
-<BR>[Calls]<UL><LI><a href="#[b4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_lasr
-<LI><a href="#[af]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_llsl
+<BR>[Calls]<UL><LI><a href="#[af]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_llsl
 <LI><a href="#[b6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_double_round
 <LI><a href="#[b5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_double_epilogue
+<LI><a href="#[b4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_lasr
 </UL>
 <BR>[Called By]<UL><LI><a href="#[14]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Scan_Processing
 <LI><a href="#[7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Index_VariableSpeed
@@ -962,7 +962,7 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> freertos.o(.constdata)
 </UL>
-<P><STRONG><a name="[e]"></a>Chassis_Control</STRONG> (Thumb, 1836 bytes, Stack size 32 bytes, chassis_control.o(i.Chassis_Control))
+<P><STRONG><a name="[e]"></a>Chassis_Control</STRONG> (Thumb, 1864 bytes, Stack size 32 bytes, chassis_control.o(i.Chassis_Control))
 <BR><BR>[Stack]<UL><LI>Max Depth = 424<LI>Call Chain = Chassis_Control &rArr; PowerLimit_Processing &rArr; PowerLimit_Calculate &rArr; __hardfp_pow &rArr; __kernel_poly &rArr; __aeabi_dmul &rArr; _double_epilogue &rArr; _double_round
 </UL>
 <BR>[Calls]<UL><LI><a href="#[d3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;break_init
@@ -2093,7 +2093,7 @@ Global Symbols
 <LI><a href="#[db]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Vision_Control_Cloud
 </UL>
 
-<P><STRONG><a name="[8]"></a>Random_Processing</STRONG> (Thumb, 408 bytes, Stack size 8 bytes, chassis_control.o(i.Random_Processing))
+<P><STRONG><a name="[8]"></a>Random_Processing</STRONG> (Thumb, 602 bytes, Stack size 8 bytes, chassis_control.o(i.Random_Processing))
 <BR><BR>[Stack]<UL><LI>Max Depth = 360<LI>Call Chain = Random_Processing &rArr; Index_VariableSpeed &rArr; __hardfp_pow &rArr; __kernel_poly &rArr; __aeabi_dmul &rArr; _double_epilogue &rArr; _double_round
 </UL>
 <BR>[Calls]<UL><LI><a href="#[f0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Get_RandomNumbers_Range
@@ -2729,7 +2729,7 @@ Global Symbols
 <LI><a href="#[13c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__hardfp_log
 </UL>
 
-<P><STRONG><a name="[d5]"></a>break_control</STRONG> (Thumb, 486 bytes, Stack size 0 bytes, break.o(i.break_control))
+<P><STRONG><a name="[d5]"></a>break_control</STRONG> (Thumb, 544 bytes, Stack size 0 bytes, break.o(i.break_control))
 <BR><BR>[Called By]<UL><LI><a href="#[e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Chassis_Control
 </UL>
 

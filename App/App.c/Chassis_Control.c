@@ -21,6 +21,9 @@ const uint16_t Ran_Dir_Pro = 70;
 int32_t B0_Location = 49834;			//这个值不要取定值，取确定云台pitch轴时的total
 int32_t B0_Lenght = 100000;
 
+//记录上刻撞柱子的位子
+uint8_t trace_flag = 0;
+
 /*
 const uint16_t Random_Intervaltimes = 500; //500ms间隔采样
 const uint8_t Random_Proportion = 50;      //随机概率占比
@@ -274,22 +277,23 @@ void Index_VariableSpeed(void)
 
 float res_d;
 uint32_t aaaaaa;
+uint32_t cccccccc = 0;
+uint32_t nnnnnnnn = 0;
+uint32_t bbbbbbbb = 0;
+
+uint16_t rad_min = 200;
+uint16_t rad_max = 450;
+
 //随机模式
 void Random_Processing(void)
 {
-    //主动攻击的状态标志位
-    static uint8_t fire_flag = 0;
+
     //百分百速度运行
     Chassis.Random.percent = 1.0f;
 
-    //更新方向随机数
-    Chassis.Random.Dir_number = Get_RandomNumbers_Range(0, 100);
 		//更新时间随机数
-		Chassis.Random.Time_number = Get_RandomNumbers_Range(400,650);
-//		if(Robots_Control.Chassis_e == A_cs_Cruise)
-//		{
-//			Chassis.Random.Time_number = Get_RandomNumbers_Range(450,600);
-//		}
+		Chassis.Random.Time_number = Get_RandomNumbers_Range(rad_min,rad_max);
+
 		//3000ms进行一次模式切换的检测
 		if((Chassis.Random.Time % 3000 == 0) && Chassis.Random.Time > 0)
 		{
@@ -303,54 +307,17 @@ void Random_Processing(void)
 		//运行随机数的总时间
 		Chassis.Random.Time++;
 
-//		//运行模式时间的选择占比20（共50）
-//		if(Chassis.Random.Mode_number < 3)
-//		{	
-//			//定周期不定变向
-//			if (Chassis.Random.Dir_times == Ran_Dir_Sam)
-//			{
-//        //采取变向：随机概率为50%
-//        if (Chassis.Random.Dir_number < Ran_Dir_Pro)
-//        {
-//            Chassis.Random.Dir = -Chassis.Random.Dir; //反向
-//        }
-//        Chassis.Random.Dir_times = 0; //方向周期清0
-//			}
-//		}
-//		//运行模式时间选择占比30（共50）
-//		else if(Chassis.Random.Mode_number >= 3)
-//		{
-			res_d = abs(Chassis.Random.Dir_times - Chassis.Random.Time_number);
-			//不定周期定变向
-			if(res_d < 2.0f && Chassis.Random.Break_flag == 0)				//未处于刹车过程中，才需要再次改变方向
-			{
-				Chassis.Random.Break_flag = 1; 
-				aaaaaa++;
-				Chassis.Random.Dir = -Chassis.Random.Dir; //反向
-				Chassis.Random.Dir_times = 0; 						//方向周期清0
-			}
-//		}
-			if(Chassis.Random.Dir_times > 610)				//限幅：防止无法res_d条件不成立无法进入变向清0
-			{
-				Chassis.Random.Dir_times = 0;
-			}
-		
-		//无受到攻击时巡航减低速度
+		if(Chassis.Random.Dir_times > 1000)				//限幅
+		{
+			Chassis.Random.Dir_times = 0;
+		}
+				//无受到攻击时巡航减低速度
 		if(Robots_Control.Chassis_e == A_cs_Cruise)
 		{
 //		Chassis.Random.percent = 0.75f;
 			Chassis.Random.percent = 1.0f;
 		}
 		
-    //排除随机运动的方向与撞柱方向的冲突
-		if(Chassis.CDisable.Left_flag == 1)
-		{
-			Chassis.Random.Dir = -1;
-		}
-		else if(Chassis.CDisable.Right_flag == 1)
-		{
-			Chassis.Random.Dir = 1;
-		}
 		//撞柱和刹车的冲突
 		if(Chassis.CDisable.Left_flag == 1 || Chassis.CDisable.Right_flag == 1)
 		{
@@ -360,57 +327,85 @@ void Random_Processing(void)
 			Break_static = 0;
 			//刹车的目标值置中
 			M2006_targe_angle = break_basic.BREAK_MID;
+			
+			//清楚变向计时，避免在撞柱子和非撞柱边界反复变向,避免在撞柱的区域内还持续计时
+			Chassis.Random.Dir_times = 0;
+			
+			//排除随机运动的方向与撞柱方向的冲突
+			if(Chassis.CDisable.Left_flag == 1)
+			{
+				Chassis.Random.Dir = -1;
+			}
+			else if(Chassis.CDisable.Right_flag == 1)
+			{
+				Chassis.Random.Dir = 1;
+			}
+		}
+		else if(Chassis.CDisable.Left_flag == 0 && Chassis.CDisable.Right_flag == 0)			//非在撞柱区间才执行变向操作
+		{
+			//不定周期定变向
+			if((Chassis.Random.Dir_times > Chassis.Random.Time_number) && Chassis.Random.Break_flag == 0)				//未处于刹车过程中，才需要再次改变方向
+			{
+				if(Chassis.Velocity.temp_Speed < 0)
+				{
+					bbbbbbbb++;
+				}
+				
+				//若上次撞柱子是为左侧，那么整体趋势就要向右运动
+				if(trace_flag == 1)
+				{
+					if(Chassis.Velocity.temp_Speed > 0)
+					{
+						rad_min -= 50;					//减小变向的检测时间，Speed<0的变向频率
+						if(rad_min < 150)
+						{
+							rad_min = 150;
+						}
+					}				
+					else if(Chassis.Velocity.temp_Speed < 0)
+					{
+						rad_min += 100;
+						if(rad_min > rad_max)
+						{
+							rad_min = 200;			//重新回归
+						}
+					}
+				}
+				else if(trace_flag == 2)//若为右侧撞柱子，则整体趋势应该往左移动
+				{
+					if(Chassis.Velocity.temp_Speed > 0.0f)
+					{
+						cccccccc++;
+						rad_min += 100;
+						if(rad_min > rad_max)
+						{
+							rad_min = 200;
+						}
+					}					
+					else if(Chassis.Velocity.temp_Speed < 0.0f)
+					{
+						rad_min -= 50;
+						nnnnnnnn++;
+						if(rad_min < 150)
+						{
+							rad_min = 150;
+						}
+					}
+				}
+				aaaaaa++;
+				Chassis.Random.Break_flag = 1; 
+				Chassis.Random.Dir = -Chassis.Random.Dir; //反向
+				Chassis.Random.Dir_times = 0; 						//方向周期清0
+			}
+		
 		}
 		
-/*	只有激光测距
-		if(Sensor_R.RawData.DIST < 35 )//|| Chassis.encoder->totalLine < (Chassis.Route_limit.right + 7800))
-		{
-        Chassis.Random.Dir = 1;
-    }
-    else if (Sensor_L.RawData.DIST < 35 )//|| Chassis.encoder->totalLine > (Chassis.Route_limit.left - 7800))
-    {
-        Chassis.Random.Dir = -1;
-    }
-*/
-		
-/*
-    //若处于主动进攻状态则
-    //判断我方id，决定要血量的比较
-    //		if(ext_game_robot_state.data.robot_id == 7)		//说明我方是红方
-    //		{
-    //			if(ext_game_robot_HP.data.red_7_robot_HP > ext_game_robot_HP.data.blue_7_robot_HP)
-    //			{
-    //				fire_flag = 1;
-    //			}
-    //			else
-    //			{
-    //				fire_flag = 0;
-    //			}
-    //		}
-    //		else if(ext_game_robot_state.data.robot_id == 107)
-    //		{
-    //			if(ext_game_robot_HP.data.red_7_robot_HP < ext_game_robot_HP.data.blue_7_robot_HP)
-    //			{
-    //				fire_flag = 1;
-    //			}
-    //			else
-    //			{
-    //				fire_flag = 0;
-    //			}
-    //		}
-    //		if(fire_flag == 1)
-    //		{
-    //			Chassis.Random.Dir = 1;			//不变向
-    //			Chassis.Random.percent = 0.8f;			//以百分之80%
-    //		}
-*/
-
     //执行变速
     Index_VariableSpeed();
     //方向 + 速度
-    Chassis.Velocity.temp_Speed = Chassis.Random.Dir * Chassis.Index_VarSpe.abs_Vel * Chassis.Random.percent;
-
-    /*【21赛季】
+    Chassis.Velocity.temp_Speed =(float)Chassis.Random.Dir * Chassis.Index_VarSpe.abs_Vel * Chassis.Random.percent;
+		
+		/*【21赛季】
     //先置速度为随机运动的速度
     if (fabs(Chassis.Velocity.temp_Speed) != Random_Velocity)
     {
@@ -789,6 +784,7 @@ void Chassis_Init(void)
 
     //		Chassis.Route_limit.flag = 1;
 }
+
 float debug_location = 0.0f;
 void Chassis_Control(void)
 {
@@ -958,6 +954,7 @@ void Chassis_Control(void)
 				if(Chassis.encoder->totalLine > (Chassis.Route_limit.left - 6400) && Chassis.EM->realSpeed > 30)
 				{
 					Chassis.CDisable.Left_flag = 1;
+					trace_flag = 1;			//左侧
 				}
 			}
 			else if(Sensor_L.RawData.APM > 1000)
@@ -965,6 +962,7 @@ void Chassis_Control(void)
 				if(Sensor_L.RawData.DIST < 50 && Chassis.EM->realSpeed > 30)
 				{
 					Chassis.CDisable.Left_flag = 1;
+					trace_flag = 1;   //左侧
 				}
 			}
 			//右
@@ -973,6 +971,7 @@ void Chassis_Control(void)
 				if(Chassis.encoder->totalLine < (Chassis.Route_limit.right  + 6400) && Chassis.EM->realSpeed < -30)
 				{
 					Chassis.CDisable.Right_flag = 1;
+					trace_flag = 2;			//右侧
 				}
 			}
 			else if(Sensor_R.RawData.APM > 1000)
@@ -980,6 +979,7 @@ void Chassis_Control(void)
 				if(Sensor_R.RawData.DIST < 50 && Chassis.EM->realSpeed < -30)
 				{
 					Chassis.CDisable.Right_flag = 1;
+					trace_flag = 2;				//右侧
 				}
 			}
 /*		优先级激光测距
