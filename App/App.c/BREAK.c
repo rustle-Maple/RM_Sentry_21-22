@@ -205,6 +205,7 @@ void break_control(void)
 						Break_static = 4;					
 					}
 				}
+//				Break_static = 4;
 				if(Break_static == 4)						//第三阶段刹车完成
 				{
 					//清楚变向需要刹车标志位
