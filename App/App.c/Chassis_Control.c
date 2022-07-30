@@ -15,8 +15,8 @@ const uint16_t R_Upper_Limit = 9000;			//8000
 // const float Random_Velocity = 6500.0f;
 const float Frenzy_Velocity = 6500.0f;
 //随机运动的采样时间
-const uint16_t Ran_Dir_Sam = 350;
-const uint16_t Ran_Dir_Pro = 65;
+const uint16_t Ran_Dir_Sam = 200;
+const uint16_t Ran_Dir_Pro = 70;
 
 int32_t B0_Location = 49834;			//这个值不要取定值，取确定云台pitch轴时的total
 int32_t B0_Lenght = 100000;
@@ -200,6 +200,10 @@ void Route_limit_Processing(void)
                 Chassis.Route_limit.time = 0;       //时间
                 Chassis.Route_limit.right_flag = 0; //右限制
                 Chassis.Route_limit.left_flag = 0;
+							
+								//右边界标志位
+								Chassis.CDisable.Right_flag = 1;
+								trace_flag = 2;
             }
         }
     }
@@ -281,9 +285,10 @@ uint32_t cccccccc = 0;
 uint32_t nnnnnnnn = 0;
 uint32_t bbbbbbbb = 0;
 uint32_t dddddddd = 0;
+uint32_t eeeeeeee = 0;
 
-uint16_t rad_min = 350;
-uint16_t rad_max = 450;
+uint16_t rad_min = 300;
+uint16_t rad_max = 350;
 
 //随机模式
 void Random_Processing(void)
@@ -316,8 +321,8 @@ void Random_Processing(void)
 				//无受到攻击时巡航减低速度
 		if(Robots_Control.Chassis_e == A_cs_Cruise)
 		{
-//		Chassis.Random.percent = 0.75f;
-			Chassis.Random.percent = 1.0f;
+		Chassis.Random.percent = 0.75f;
+	//		Chassis.Random.percent = 1.0f;
 		}
 				
 		//撞柱和刹车的冲突
@@ -328,7 +333,14 @@ void Random_Processing(void)
 			//刹车状态清0
 			Break_static = 0;
 			//刹车的目标值置中
-			M2006_targe_angle = break_basic.BREAK_MID;
+			if(Chassis.CDisable.Left_flag == 1)
+			{
+				M2006_targe_angle = break_basic.BREAK_MID + 1500;
+			}
+			else if(Chassis.CDisable.Right_flag == 1)
+			{
+				M2006_targe_angle = break_basic.BREAK_MID - 1500;
+			}
 			
 			//清楚变向计时，避免在撞柱子和非撞柱边界反复变向,避免在撞柱的区域内还持续计时
 			Chassis.Random.Dir_times = 0;
@@ -342,38 +354,52 @@ void Random_Processing(void)
 			{
 				Chassis.Random.Dir = 1;
 			}
+			
+			//一旦处于撞柱，下次变向就得久
+			rad_min = 300;
+			rad_max = 350;
+			if(Robots_Control.Chassis_e == A_cs_Cruise)
+			{
+				rad_min = 450;
+				rad_max = 500;
+			}
 		}
 		else if(Chassis.CDisable.Left_flag == 0 && Chassis.CDisable.Right_flag == 0)			//非在撞柱区间才执行变向操作
 		{
-			
-			if(Chassis.Random.Mode_number < 7)
+			if(Chassis.Random.Mode_number < 8)
 			{
 				//不定周期定变向
-				if(Chassis.Random.Dir_times > Chassis.Random.Time_number && Chassis.Random.Break_flag == 0)				//未处于刹车过程中，才需要再次改变方向
+				if(Chassis.Random.Dir_times > Chassis.Random.Time_number  && Chassis.Random.Break_flag == 0)				//未处于刹车过程中，才需要再次改变方向
 				{
 					aaaaaa++;
 					if(Chassis.Velocity.temp_Speed < 0)
 					{
 						dddddddd++;
 					}
+
 				
 					//若上次撞柱子是为左侧，那么整体趋势就要向右运动
 					if(trace_flag == 1)
 					{
 						if(Chassis.Velocity.temp_Speed < 0)
 						{
-							rad_min -= 40;					//减小变向的检测时间，Speed<0的变向频率
-							if(rad_min < 350)
+							eeeeeeee++;
+							rad_min = 150;
+							rad_max = 200;
+							if(Robots_Control.Chassis_e == A_cs_Cruise)
 							{
-								rad_min = 350;
+								rad_min = 300;
+								rad_max = 350;
 							}
 						}				
 						else if(Chassis.Velocity.temp_Speed > 0)
 						{
-							rad_min += 60;
-							if(rad_min > rad_max)
+							rad_min = 200;
+							rad_max = 250;
+							if(Robots_Control.Chassis_e == A_cs_Cruise)
 							{
-								rad_min = 350;			//重新回归
+								rad_min = 350;
+								rad_max = 400;
 							}
 						}
 					}
@@ -382,34 +408,38 @@ void Random_Processing(void)
 						if(Chassis.Velocity.temp_Speed < 0.0f)
 						{
 							cccccccc++;
-							rad_min += 60;
-							if(rad_min > rad_max)
+							rad_min = 200;
+							rad_max = 250;
+							if(Robots_Control.Chassis_e == A_cs_Cruise)
 							{
 								rad_min = 350;
+								rad_max = 400;
 							}
 						}					
 						else if(Chassis.Velocity.temp_Speed > 0.0f)
 						{
-							rad_min -= 40;
-							nnnnnnnn++;
-							if(rad_min < 350)
+							rad_min = 150;
+							rad_max = 200;
+							if(Robots_Control.Chassis_e == A_cs_Cruise)
 							{
-								rad_min = 350;
+								rad_min = 300;
+								rad_max = 350;
 							}
 						}
 					}
-//				Chassis.Random.Break_flag = 1; 
+					Chassis.Random.Break_flag = 1; 
 					Chassis.Random.Dir = -Chassis.Random.Dir; //反向
 					Chassis.Random.Dir_times = 0; 						//方向周期清0
 				}
 			}
-			else if(Chassis.Random.Mode_number >= 7)
+			else if(Chassis.Random.Mode_number >= 8)
 			{
-				//定周期不定变向:300ms
-				if(Chassis.Random.Dir_times % Ran_Dir_Sam == 0)
+				//定周期不定变向
+				if((Chassis.Random.Dir_times % Ran_Dir_Sam == 0)&& Chassis.Random.Break_flag == 0)
 				{
 					if(Chassis.Random.Dir_number < Ran_Dir_Pro)
 					{
+						Chassis.Random.Break_flag = 1;
 						Chassis.Random.Dir = -Chassis.Random.Dir; //反向
 						Chassis.Random.Dir_times = 0; 						//方向周期清0
 					}
@@ -417,7 +447,7 @@ void Random_Processing(void)
 			}				
 		
 		}
-		
+				
     //执行变速
     Index_VariableSpeed();
     //方向 + 速度
@@ -773,7 +803,7 @@ void Chassis_Init(void)
 		
 		//刹车电机PID初始化
     P_PID_FUN.P_PID_Parameter_Init(&BREAK_ANGLE_pid, 0.3f, 0.0f, 0.0f, 5000.0f, 0.0f, 0.0f, 0.85, 10, -10, 3500, -3500); //实际上看你想要的目标速度是多少
-    P_PID_FUN.P_PID_Parameter_Init(&BREAK_SPEED_pid, 3.0f, 0.01f, 0.0f, 3000.0f, 0.0f, 0.0f, 0.85, 500, -500, 4000, -4000);
+    P_PID_FUN.P_PID_Parameter_Init(&BREAK_SPEED_pid, 3.0f, 0.01f, 0.0f, 3000.0f, 0.0f, 0.0f, 0.85, 1000, -1000, 8000, -8000);
 				
 
     //判断主控是否连上服务器 - 则对应相应的底盘功率
@@ -926,7 +956,7 @@ void Chassis_Control(void)
 		send_to_break=P_PID_Regulation(&BREAK_SPEED_pid,M2006_targe_speed,M3508s[BREAK_ID].realSpeed);
 		
 		//刹车控制
-	//	break_control();
+		break_control();
 				
 		//zhuangzhu
     if (Robots_Control.Chassis_e == A_cs_Cruise || Robots_Control.Chassis_e == A_cs_Random)

@@ -163,142 +163,102 @@
         <Ww>
           <count>1</count>
           <WinNumber>1</WinNumber>
-          <ItemText>Robots_Control</ItemText>
+          <ItemText>Sensor_R,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>2</count>
           <WinNumber>1</WinNumber>
-          <ItemText>Sensor_R,0x0A</ItemText>
+          <ItemText>Sensor_L,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>3</count>
           <WinNumber>1</WinNumber>
-          <ItemText>Sensor_L,0x0A</ItemText>
+          <ItemText>Chassis_PowerLimit</ItemText>
         </Ww>
         <Ww>
           <count>4</count>
           <WinNumber>1</WinNumber>
-          <ItemText>Chassis_PowerLimit</ItemText>
+          <ItemText>break_basic,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>5</count>
           <WinNumber>1</WinNumber>
-          <ItemText>Chassis_Encoder,0x0A</ItemText>
+          <ItemText>send_to_break,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>6</count>
           <WinNumber>1</WinNumber>
-          <ItemText>break_basic,0x0A</ItemText>
+          <ItemText>rad_min,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>7</count>
           <WinNumber>1</WinNumber>
-          <ItemText>M3508s,0x0A</ItemText>
+          <ItemText>Break_static,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>8</count>
           <WinNumber>1</WinNumber>
-          <ItemText>BREAK_ANGLE_pid</ItemText>
+          <ItemText>Chassis.EM-&gt;realSpeed,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>9</count>
           <WinNumber>1</WinNumber>
-          <ItemText>BREAK_SPEED_pid</ItemText>
+          <ItemText>M3508s[2].totalAngle</ItemText>
         </Ww>
         <Ww>
           <count>10</count>
           <WinNumber>1</WinNumber>
-          <ItemText>DR16,0x0A</ItemText>
+          <ItemText>Chassis.Random.Dir_times,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>11</count>
           <WinNumber>1</WinNumber>
-          <ItemText>Break_static,0x0A</ItemText>
+          <ItemText>Chassis.Random.Time_number,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>12</count>
           <WinNumber>1</WinNumber>
-          <ItemText>aaaaaa,0x0A</ItemText>
+          <ItemText>trace_flag,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>13</count>
           <WinNumber>1</WinNumber>
-          <ItemText>res_d</ItemText>
+          <ItemText>Chassis.Velocity.temp_Speed</ItemText>
         </Ww>
         <Ww>
           <count>14</count>
           <WinNumber>1</WinNumber>
-          <ItemText>M2006_targe_angle,0x0A</ItemText>
+          <ItemText>cccccccc,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>15</count>
           <WinNumber>1</WinNumber>
-          <ItemText>BREAK_ANGLE_pid</ItemText>
+          <ItemText>Chassis.Random.Break_flag,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>16</count>
           <WinNumber>1</WinNumber>
-          <ItemText>break_basic,0x0A</ItemText>
+          <ItemText>dddddddd,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>17</count>
           <WinNumber>1</WinNumber>
-          <ItemText>send_to_break,0x0A</ItemText>
+          <ItemText>M2006_targe_angle,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>18</count>
           <WinNumber>1</WinNumber>
-          <ItemText>DR16,0x0A</ItemText>
+          <ItemText>Chassis.CDisable.Left_times,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>19</count>
           <WinNumber>1</WinNumber>
-          <ItemText>start_use_break,0x0A</ItemText>
+          <ItemText>break_basic.BREAK_MID,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>20</count>
           <WinNumber>1</WinNumber>
-          <ItemText>rad_min,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>21</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>trace_flag,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>22</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>cccccccc,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>23</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>nnnnnnnn,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>24</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>Chassis.Random.Dir,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>25</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>Chassis.Velocity.temp_Speed</ItemText>
-        </Ww>
-        <Ww>
-          <count>26</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>bbbbbbbb,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>27</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>dddddddd,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>28</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>aaaaaa</ItemText>
+          <ItemText>Break_static,0x0A</ItemText>
         </Ww>
       </WatchWindow1>
       <WatchWindow2>

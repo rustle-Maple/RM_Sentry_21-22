@@ -154,45 +154,47 @@ void break_control(void)
 					if(Chassis.EM->realSpeed > 0)					//左刹车
 					{
 						//确定刹车电机2006的目标角度
-						M2006_targe_angle = break_basic.BREAK_MAX + 1500;		//比大更大
+						M2006_targe_angle = break_basic.BREAK_MAX + 3000;		//比大更大
 						Break_static = 21;										//处于左刹阶段
 					}
 					else if(Chassis.EM->realSpeed < 0)		//右刹车
 					{
 						//确定刹车电机2006的目标角度
-						M2006_targe_angle =  break_basic.BREAK_MIN -1500;			//比小更小 
+						M2006_targe_angle =  break_basic.BREAK_MIN -3000;			//比小更小 
 						Break_static = 22;										//处于右杀阶段
 					}
 				}
+				
 				if(Break_static == 21)
 				{
-					if(Chassis.EM->realSpeed < 4000)
+					if(M3508s[BREAK_ID].totalAngle > break_basic.BREAK_MAX + 3000)			//比最大值大一点点
 					{
 						send_to_break = 0;
 					}
-					if(Chassis.EM->realSpeed < 300)
+					if(Chassis.EM->realSpeed < 100)
 					{
 						Break_static = 31;
 					}
 				}
 				else if(Break_static == 22)
 				{
-					if(Chassis.EM->realSpeed > -4000)
+					if(M3508s[BREAK_ID].totalAngle < break_basic.BREAK_MIN - 3000)			//比最小值再小一点点
 					{
 						send_to_break = 0;
 					}
-					if(Chassis.EM->realSpeed > -300)
+					if(Chassis.EM->realSpeed > -100)
 					{
 						Break_static = 32;
 					}
 				}	
+				
 				//现在变向停留的时间太长了，观测一下功率看一下是否要速度低于（同向）某个较小值就反向使能 
 				if(Break_static == 31)							//第2阶段的1类
 				{
 					if(Chassis.EM->realSpeed < -30)		//非0而是某个阈值
 					{
 						//抬起刹车
-						M2006_targe_angle = break_basic.BREAK_MID;
+						M2006_targe_angle = break_basic.BREAK_MID - 1500;
 						Break_static = 4;									
 					}
 				}
@@ -201,27 +203,27 @@ void break_control(void)
 					if(Chassis.EM->realSpeed > 30)		//非0而是某个阈值
 					{
 						//抬起刹车
-						M2006_targe_angle = break_basic.BREAK_MID;
+						M2006_targe_angle = break_basic.BREAK_MID + 1500;
 						Break_static = 4;					
 					}
 				}
-//				Break_static = 4;
+				
 				if(Break_static == 4)						//第三阶段刹车完成
 				{
 					//清楚变向需要刹车标志位
 					Chassis.Random.Break_flag = 0;
 					//清楚刹车状态标志位
 					Break_static = 0;
+					//避免在变向过程中还一直计数
+					Chassis.Random.Dir_times = 0;
 				}
-		
-				if(Chassis.Random.Break_flag == 0 || Break_static == 4 || Break_static == 0 )			//若处于刹车完成或刹车未开始状态
-				{
-					M2006_targe_angle = break_basic.BREAK_MID;		//抬起刹车
-				}
+				
+
 				if(Break_static == 1 || Break_static == 21 || Break_static == 22)
 				{
 					Chassis.EM->OutputCurrent = 0;			//底盘电机失能
 				}
+				
 			}
 			else if(Chassis.CDisable.Left_flag == 1 || Chassis.CDisable.Right_flag == 1)
 			{
@@ -230,7 +232,16 @@ void break_control(void)
 				//刹车状态清0
 				Break_static = 0;
 				//刹车的目标值置中
-				M2006_targe_angle = break_basic.BREAK_MID;
+				if(Chassis.CDisable.Left_flag == 1)
+				{
+					M2006_targe_angle = break_basic.BREAK_MID + 1500;
+				}
+				else if(Chassis.CDisable.Right_flag == 1)
+				{
+					M2006_targe_angle = break_basic.BREAK_MID - 1500;
+				}
+				//避免在变向过程中还一直计数
+				Chassis.Random.Dir_times = 0;
 			}
 		}
 		else if(Robots_Control.Chassis_e == R_cs_Common)		//若处于手动状态
@@ -248,7 +259,13 @@ void break_control(void)
 				M2006_targe_angle = break_basic.BREAK_MID;					//刹车抬起
 			}
 		}
-	}		
+		
+	}
+	else
+	{
+		Break_static = 0;
+		Chassis.Random.Break_flag = 0;
+	}
 }
 
 
