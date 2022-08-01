@@ -171,7 +171,7 @@ void break_control(void)
 					{
 						send_to_break = 0;
 					}
-					if(Chassis.EM->realSpeed < 100)
+					if(Chassis.EM->realSpeed < 800)
 					{
 						Break_static = 31;
 					}
@@ -182,7 +182,7 @@ void break_control(void)
 					{
 						send_to_break = 0;
 					}
-					if(Chassis.EM->realSpeed > -100)
+					if(Chassis.EM->realSpeed > -800)
 					{
 						Break_static = 32;
 					}

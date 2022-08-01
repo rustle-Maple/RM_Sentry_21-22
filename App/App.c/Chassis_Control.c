@@ -287,8 +287,8 @@ uint32_t bbbbbbbb = 0;
 uint32_t dddddddd = 0;
 uint32_t eeeeeeee = 0;
 
-uint16_t rad_min = 300;
-uint16_t rad_max = 350;
+uint16_t rad_min = 325;
+uint16_t rad_max = 375;
 
 //随机模式
 void Random_Processing(void)
@@ -321,7 +321,7 @@ void Random_Processing(void)
 				//无受到攻击时巡航减低速度
 		if(Robots_Control.Chassis_e == A_cs_Cruise)
 		{
-		Chassis.Random.percent = 0.75f;
+		Chassis.Random.percent = 0.85f;
 	//		Chassis.Random.percent = 1.0f;
 		}
 				
@@ -356,8 +356,8 @@ void Random_Processing(void)
 			}
 			
 			//一旦处于撞柱，下次变向就得久
-			rad_min = 300;
-			rad_max = 350;
+			rad_min = 325;
+			rad_max = 375;
 			if(Robots_Control.Chassis_e == A_cs_Cruise)
 			{
 				rad_min = 450;
@@ -366,7 +366,7 @@ void Random_Processing(void)
 		}
 		else if(Chassis.CDisable.Left_flag == 0 && Chassis.CDisable.Right_flag == 0)			//非在撞柱区间才执行变向操作
 		{
-			if(Chassis.Random.Mode_number < 8)
+			if(Chassis.Random.Mode_number <= 8)
 			{
 				//不定周期定变向
 				if(Chassis.Random.Dir_times > Chassis.Random.Time_number  && Chassis.Random.Break_flag == 0)				//未处于刹车过程中，才需要再次改变方向
@@ -432,7 +432,7 @@ void Random_Processing(void)
 					Chassis.Random.Dir_times = 0; 						//方向周期清0
 				}
 			}
-			else if(Chassis.Random.Mode_number >= 8)
+			else if(Chassis.Random.Mode_number > 8)
 			{
 				//定周期不定变向
 				if((Chassis.Random.Dir_times % Ran_Dir_Sam == 0)&& Chassis.Random.Break_flag == 0)
